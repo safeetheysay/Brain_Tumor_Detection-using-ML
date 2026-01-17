@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>NeuroScan AI | Brain Tumor Detection</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Inter',sans-serif; }
+
+body {
+    min-height:100vh;
+    background:radial-gradient(circle at top,#0f172a,#020617);
+    color:#e5e7eb;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:40px;
+}
+
+.container {
+    width:100%;
+    max-width:1100px;
+    background:rgba(15,23,42,.75);
+    backdrop-filter:blur(14px);
+    border-radius:22px;
+    padding:40px 45px;
+    box-shadow:0 30px 80px rgba(0,0,0,.55);
+}
+
+/* HEADER */
+.header {
+    text-align:center;
+    margin-bottom:35px;
+}
+
+.header h1 {
+    font-size:3rem;
+    font-weight:800;
+    background:linear-gradient(90deg,#6366f1,#9333ea,#ec4899);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+}
+
+.header p {
+    color:#9ca3af;
+    margin-top:8px;
+}
+
+/* FORM */
+form {
+    text-align:center;
+    margin-bottom:35px;
+}
+
+input[type="file"] { display:none; }
+
+.upload-label {
+    display:inline-block;
+    padding:16px 34px;
+    border-radius:14px;
+    border:2px dashed rgba(99,102,241,.5);
+    cursor:pointer;
+    color:#c7d2fe;
+}
+
+.analyze-btn {
+    margin-top:22px;
+    padding:14px 42px;
+    border-radius:14px;
+    border:none;
+    background:linear-gradient(135deg,#6366f1,#9333ea);
+    color:white;
+    font-weight:600;
+    cursor:pointer;
+}
+
+/* RESULT GRID */
+.result-grid {
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:32px;
+    align-items:center;
+}
+
+@media(max-width:900px){
+    .result-grid { grid-template-columns:1fr; }
+}
+
+/* IMAGE */
+.preview {
+    height:320px;
+    border-radius:18px;
+    border:1px dashed rgba(255,255,255,.08);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    overflow:hidden;
+}
+
+.preview img {
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    border-radius:18px;
+    box-shadow:0 20px 45px rgba(0,0,0,.6);
+}
+
+.placeholder {
+    text-align:center;
+    color:#64748b;
+    font-size:.95rem;
+}
+
+/* RESULT TEXT */
+.success {
+    color:#22c55e;
+    font-size:2rem;
+    font-weight:700;
+}
+
+.warning {
+    color:#ef4444;
+    font-size:2rem;
+    font-weight:700;
+}
+
+.confidence {
+    margin-top:14px;
+    font-size:1.1rem;
+    color:#c7d2fe;
+}
+
+/* FOOTER */
+footer {
+    margin-top:40px;
+    text-align:center;
+    color:#9ca3af;
+    font-size:.9rem;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<div class="header">
+    <h1><i class="fas fa-brain"></i> NeuroScan AI</h1>
+    <p>Deep Learning–Powered Brain Tumor Detection</p>
+</div>
+
+<form method="POST" enctype="multipart/form-data" id="uploadForm">
+    <label for="file" class="upload-label">
+        <i class="fas fa-upload"></i> Upload MRI Scan
+    </label>
+    <input type="file" id="file" name="file" accept="image/*" required onchange="previewImage(this)">
+    <br>
+    <button class="analyze-btn" type="submit">Analyze Scan</button>
+</form>
+
+<div class="result-grid">
+
+<!-- IMAGE SECTION -->
+<div class="preview">
+    <!-- Always show this image element -->
+    <img id="imagePreview" 
+         {% if file_path %}
+            src="{{ url_for('static', filename=file_path) }}"
+         {% endif %}
+         style="{% if not file_path %}display:none;{% endif %}" 
+         alt="MRI Preview">
+    
+    <!-- Always show placeholder -->
+    <div class="placeholder" id="placeholder" 
+         style="{% if file_path %}display:none;{% endif %}">
+        <i class="fas fa-image fa-2x"></i><br><br>
+        Upload & analyze to view MRI scan
+    </div>
+</div>
+
+<!-- RESULT -->
+<div id="resultContainer">
+    {% if result %}
+        {% if 'No Tumor' in result %}
+            <div class="success">
+                <i class="fas fa-check-circle"></i> {{ result }}
+            </div>
+        {% else %}
+            <div class="warning">
+                <i class="fas fa-triangle-exclamation"></i> {{ result }}
+            </div>
+        {% endif %}
+    {% endif %}
+
+    {% if confidence %}
+        <div class="confidence">
+            AI Confidence: {{ confidence }}
+        </div>
+    {% endif %}
+</div>
+
+</div>
+
+<footer>
+    Built dark. Built fast. Built by Safee & AI 🤝
+</footer>
+
+</div>
+
+<script>
+function previewImage(input) {
+    const preview = document.getElementById('imagePreview');
+    const placeholder = document.getElementById('placeholder');
+    
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+            preview.style.display = 'block';
+            if (placeholder) placeholder.style.display = 'none';
+        }
+        
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+</script>
+</body>
+</html>
