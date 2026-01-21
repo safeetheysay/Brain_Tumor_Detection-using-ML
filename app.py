@@ -15,7 +15,7 @@ model = load_model('models/model.h5')
 # Class labels
 class_labels = ['pituitary', 'glioma', 'notumor', 'meningioma']
 
-# Define ONLY static/uploads folder
+# Define static/uploads folder
 UPLOAD_FOLDER = 'static/uploads'
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
